@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Library Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            background-color: #e9e9e9;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .delete {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .delete:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Admin Library Management</h1>
+            <button onclick="logout()">Logout</button>
+        </div>
+        <form id="adminBookForm">
+            <input type="text" id="adminTitle" placeholder="Book Title" required>
+            <input type="text" id="adminAuthor" placeholder="Author" required>
+            <input type="number" id="adminYear" placeholder="Publication Year" required>
+            <button type="submit">Add Book</button>
+        </form>
+        <h2>Book List</h2>
+        <ul id="adminBookList"></ul>
+    </div>
+    <script>
+        function logout() {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('adminBookForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const title = document.getElementById('adminTitle').value;
+            const author = document.getElementById('adminAuthor').value;
+            const year = document.getElementById('adminYear').value;
+            addAdminBook(title, author, year);
+            document.getElementById('adminBookForm').reset();
+        });
+
+        function addAdminBook(title, author, year) {
+            const books = JSON.parse(localStorage.getItem('books')) || [];
+            const book = { title, author, year };
+            books.push(book);
+            localStorage.setItem('books', JSON.stringify(books));
+            displayBooks();
+        }
+
+        function deleteBook(index) {
+            const books = JSON.parse(localStorage.getItem('books')) || [];
+            books.splice(index, 1);
+            localStorage.setItem('books', JSON.stringify(books));
+            displayBooks();
+        }
+
+        function displayBooks() {
+            const books = JSON.parse(localStorage.getItem('books')) || [];
+            const bookList = document.getElementById('adminBookList');
+            bookList.innerHTML = '';
+            books.forEach((book, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span><strong>${book.title}</strong> by ${book.author} (${book.year})</span>
+                    <button class="delete" onclick="deleteBook(${index})">Delete</button>
+                `;
+                bookList.appendChild(li);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', displayBooks);
+    </script>
+</body>
+</html>

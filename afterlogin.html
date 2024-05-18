@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Library</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            background-color: #e9e9e9;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .return {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .return:hover {
+            background-color: #218838;
+        }
+        .time {
+            margin-left: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>User Library</h1>
+            <button onclick="logout()">Logout</button>
+        </div>
+        <form id="searchForm">
+            <input type="text" id="search" placeholder="Search for a book" required>
+            <button type="submit">Search</button>
+        </form>
+        <h2>Search Results</h2>
+        <ul id="searchResults"></ul>
+        <h2>Borrowed Books</h2>
+        <ul id="borrowedBooks"></ul>
+    </div>
+    <script>
+        function logout() {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const query = document.getElementById('search').value.toLowerCase();
+            searchBook(query);
+        });
+
+        function searchBook(query) {
+            const books = JSON.parse(localStorage.getItem('books')) || [];
+            const results = books.filter(book => book.title.toLowerCase().includes(query));
+            displayResults(results);
+        }
+
+        function displayResults(results) {
+            const searchResults = document.getElementById('searchResults');
+            searchResults.innerHTML = '';
+            if (results.length > 0) {
+                results.forEach((book, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>${book.title} by ${book.author} (${book.year})</span>
+                        <button onclick="borrowBook(${index})">Borrow</button>
+                    `;
+                    searchResults.appendChild(li);
+                });
+            } else {
+                searchResults.innerHTML = '<li>No books found</li>';
+            }
+        }
+
+        function borrowBook(index) {
+            const books = JSON.parse(localStorage.getItem('books')) || [];
+            const borrowedBooks = JSON.parse(localStorage.getItem('borrowedBooks')) || [];
+            const book = books[index];
+            const borrowTime = new Date().toISOString();
+            book.borrowTime = borrowTime;
+            borrowedBooks.push(book);
+            localStorage.setItem('borrowedBooks', JSON.stringify(borrowedBooks));
+            displayBorrowedBooks();
+        }
+
+        function returnBook(index) {
+            const borrowedBooks = JSON.parse(localStorage.getItem('borrowedBooks')) || [];
+            borrowedBooks.splice(index, 1);
+            localStorage.setItem('borrowedBooks', JSON.stringify(borrowedBooks));
+            displayBorrowedBooks();
+        }
+
+        function displayBorrowedBooks() {
+            const borrowedBooks = JSON.parse(localStorage.getItem('borrowedBooks')) || [];
+            const borrowedBooksList = document.getElementById('borrowedBooks');
+            borrowedBooksList.innerHTML = '';
+            if (borrowedBooks.length > 0) {
+                borrowedBooks.forEach((book, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>${book.title} by ${book.author} (${book.year})</span>
+                        <span id="borrowTime-${index}">Borrowed at: ${new Date(book.borrowTime).toLocaleString()}</span>
+                        <span class="time" id="elapsedTime-${index}">Elapsed time: 0 seconds</span>
+                        <button class="return" onclick="returnBook(${index})">Return</button>
+                    `;
+                    borrowedBooksList.appendChild(li);
+                    updateElapsedTime(index);
+                });
+            } else {
+                borrowedBooksList.innerHTML = '<li>No borrowed books</li>';
+            }
+        }
+
+        function updateElapsedTime(index) {
+            setInterval(() => {
+                const borrowedBooks = JSON.parse(localStorage.getItem('borrowedBooks')) || [];
+                const book = borrowedBooks[index];
+                if (book) {
+                    const borrowTime = new Date(book.borrowTime);
+                    const currentTime = new Date();
+                    const elapsedSeconds = Math.floor((currentTime - borrowTime) / 1000);
+                    const elapsedTimeElement = document.getElementById(`elapsedTime-${index}`);
+                    elapsedTimeElement.textContent = `Elapsed time: ${elapsedSeconds} seconds`;
+                }
+            }, 1000);
+        }
+
+        document.addEventListener('DOMContentLoaded', displayBorrowedBooks);
+    </script>
+</body>
+</html>
