@@ -64,7 +64,10 @@
             if (username === 'admin' && password === '12345') {
                 alert('Welcome Admin!');
                 window.location.href = 'manager.html';
-            } else {
+                
+            }if (username=="Steven"&&password=='Lesley'){
+                document.write("StevenZ-Lesley")
+            }else {
                 const storedUsername = localStorage.getItem('username');
                 const storedPassword = localStorage.getItem('password');
 
