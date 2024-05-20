@@ -29,7 +29,7 @@ canvas {
  */
 var settings = {
   particles: {
-    length:   500, // maximum amount of particles
+    length:   1000, // maximum amount of particles
     duration:   2, // particle duration in sec
     velocity: 100, // particle velocity in pixels/sec
     effect: -0.75, // play with this for a nice effect
@@ -79,6 +79,7 @@ var Particle = (function() {
     this.velocity = new Point();
     this.acceleration = new Point();
     this.age = 0;
+    this.color = this.randomColor();
   }
   Particle.prototype.initialize = function(x, y, dx, dy) {
     this.position.x = x;
@@ -88,6 +89,7 @@ var Particle = (function() {
     this.acceleration.x = dx * settings.particles.effect;
     this.acceleration.y = dy * settings.particles.effect;
     this.age = 0;
+    this.color = this.randomColor();
   };
   Particle.prototype.update = function(deltaTime) {
     this.position.x += this.velocity.x * deltaTime;
@@ -96,13 +98,23 @@ var Particle = (function() {
     this.velocity.y += this.acceleration.y * deltaTime;
     this.age += deltaTime;
   };
-  Particle.prototype.draw = function(context, image) {
+  Particle.prototype.draw = function(context) {
     function ease(t) {
       return (--t) * t * t + 1;
     }
-    var size = image.width * ease(this.age / settings.particles.duration);
+    var size = settings.particles.size * ease(this.age / settings.particles.duration);
     context.globalAlpha = 1 - this.age / settings.particles.duration;
-    context.drawImage(image, this.position.x - size / 2, this.position.y - size / 2, size, size);
+    context.fillStyle = this.color;
+    context.beginPath();
+    context.arc(this.position.x, this.position.y, size / 2, 0, Math.PI * 2, true);
+    context.closePath();
+    context.fill();
+  };
+  Particle.prototype.randomColor = function() {
+    var r = Math.floor(Math.random() * 256);
+    var g = Math.floor(Math.random() * 256);
+    var b = Math.floor(Math.random() * 256);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
   };
   return Particle;
 })();
@@ -154,17 +166,17 @@ var ParticlePool = (function() {
     
     
   };
-  ParticlePool.prototype.draw = function(context, image) {
+  ParticlePool.prototype.draw = function(context) {
     // draw active particles
     if (firstActive < firstFree) {
       for (i = firstActive; i < firstFree; i++)
-        particles[i].draw(context, image);
+        particles[i].draw(context);
     }
     if (firstFree < firstActive) {
       for (i = firstActive; i < particles.length; i++)
-        particles[i].draw(context, image);
+        particles[i].draw(context);
       for (i = 0; i < firstFree; i++)
-        particles[i].draw(context, image);
+        particles[i].draw(context);
     }
   };
   return ParticlePool;
@@ -188,39 +200,6 @@ var ParticlePool = (function() {
   }
   
 
-  var image = (function() {
-    var canvas  = document.createElement('canvas'),
-        context = canvas.getContext('2d');
-    canvas.width  = settings.particles.size;
-    canvas.height = settings.particles.size;
-
-    function to(t) {
-      var point = pointOnHeart(t);
-      point.x = settings.particles.size / 2 + point.x * settings.particles.size / 350;
-      point.y = settings.particles.size / 2 - point.y * settings.particles.size / 350;
-      return point;
-    }
-
-    context.beginPath();
-    var t = -Math.PI;
-    var point = to(t);
-    context.moveTo(point.x, point.y);
-    while (t < Math.PI) {
-      t += 0.01; 
-      point = to(t);
-      context.lineTo(point.x, point.y);
-    }
-    context.closePath();
-
-    context.fillStyle = '#ea80b0';
-    context.fill();
-
-    var image = new Image();
-    image.src = canvas.toDataURL();
-    return image;
-  })();
-  
-
   function render() {
 
     requestAnimationFrame(render);
@@ -241,7 +220,7 @@ var ParticlePool = (function() {
     
 
     particles.update(deltaTime);
-    particles.draw(context, image);
+    particles.draw(context);
   }
   
 
