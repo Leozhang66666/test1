@@ -64,22 +64,21 @@
             if (username === 'admin' && password === '12345') {
                 alert('Welcome Admin!');
                 window.location.href = 'manager.html';
-                
-            }if (username=="Steven"&&password=='Lesley'){
-                document.write("StevenZ❤Lesley")
-                
-            }if (username=="Leo"&&password=='Mia'){
-                document.write("StevenZ❤Lesley")
-                
-            }if(username=="Mia"&&password=='Mia"){
-                window.location.href='Mia.html';
-            }if (username=="Huili"&&password=='Gossip'){
-                document.write("Steven|Lesley%100\r")
-                document.write("Jack|I*****%0\r")
-                document.write("Lucas|Sissi%70\r")
-                document.write("Norman|Eric%30\r")
-                document.write("Evan|Bella%100\r")
-                
+            } else if (username === 'Steven' && password === 'Lesley') {
+                document.body.innerHTML = "<h1>StevenZ❤Lesley</h1>";
+            } else if (username === 'Leo' && password === 'Mia') {
+                document.body.innerHTML = "<h1>StevenZ❤Lesley</h1>";
+            } else if (username === 'Mia' && password === 'Mia') {
+                window.location.href = 'Mia.html';
+            } else if (username === 'Huili' && password === 'Gossip') {
+                document.body.innerHTML = `
+                    <h1>Gossip Results</h1>
+                    <p>Steven|Lesley: 100%</p>
+                    <p>Jack|I*****: 0%</p>
+                    <p>Lucas|Sissi: 70%</p>
+                    <p>Norman|Eric: 30%</p>
+                    <p>Evan|Bella: 100%</p>
+                `;
             } else {
                 const storedUsername = localStorage.getItem('username');
                 const storedPassword = localStorage.getItem('password');
